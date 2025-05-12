@@ -34,14 +34,14 @@ import importlib
 import probe_result_dialog
 import config as cfg
 import sj_video_conv_ui
-import lic
+# import lic
 import info
 from PySide2 import QtCore, QtGui, QtWidgets
 # from PySide2.QtUiTools import QUiLoader
 
 importlib.reload(sj_video_conv_ui)
 importlib.reload(cfg)
-importlib.reload(lic)
+# importlib.reload(lic)
 
 
 class SJVideoConvResultWindow(QtWidgets.QDialog, probe_result_dialog.Ui_Dialog):
