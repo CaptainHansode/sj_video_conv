@@ -1,5 +1,5 @@
 TOOL_NAME = 'SJ Video Conv'
-TOOL_VERSION = '1.5.4.0'
+TOOL_VERSION = '1.6.0'
 DESCRIPTION = 'SJ Tools. Video Converter.'
 BEST_BASE = 'sj_video_conv'
 AUTHOR = 'CaptainHansode'

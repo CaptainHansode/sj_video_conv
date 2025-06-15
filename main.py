@@ -28,20 +28,15 @@ import json
 import datetime
 import logging
 import numpy as np
-# from QtPy import uic
-
 import importlib
+import info
+import sj_video_conv_ui
 import probe_result_dialog
 import config as cfg
-import sj_video_conv_ui
-# import lic
-import info
 from PySide2 import QtCore, QtGui, QtWidgets
-# from PySide2.QtUiTools import QUiLoader
 
 importlib.reload(sj_video_conv_ui)
 importlib.reload(cfg)
-# importlib.reload(lic)
 
 
 class SJVideoConvResultWindow(QtWidgets.QDialog, probe_result_dialog.Ui_Dialog):
@@ -72,8 +67,6 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
         super(SJVideoConv, self).__init__(*args, **kwargs)
         """set up ui"""
         self.setupUi(self)
-        # self.loadUi('sj_video_conv_ui.ui', self)  # UICが入っている場合
-        # self._load_ui()  # self.ui に表示
         self.tool_name = info.TOOL_NAME
         self.version = info.TOOL_VERSION
         self.auther = info.AUTHOR
@@ -86,18 +79,16 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
         self._init_style()
         self.setWindowFlags(QtCore.Qt.Window)
         self.msgbox = QtWidgets.QMessageBox(self)
+        
         """logger"""
-        self.logger = logging.getLogger("sj_video_conv.log")
-        # self.logger.setLevel(10) # ログのコンソール出力の設定（3）
-        # sh = logging.StreamHandler()
-        # self.logger.addHandler(sh)
-        # fh = logging.FileHandler('UE_Startup_Render.log')
-
-        """Windowstyle"""
-        # self.setWindowFlags(QtCore.Qt.Tool)
-        # if self._check_license() is False:
-        #     self.closeEvent(self)
-        #     return None
+        self.logger = logging.getLogger(f"{info.BEST_BASE}.log")
+        self.logger.setLevel(logging.INFO)
+        if not self.logger.handlers:  # すでにハンドラーが追加されていない場合のみ追加
+            fh = logging.FileHandler(f"{info.BEST_BASE}.log", encoding="utf-8")
+            fh.setLevel(logging.INFO)
+            formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+            fh.setFormatter(formatter)
+            self.logger.addHandler(fh)
 
         self.get_exclusion_types = {
             # 古い形式など
@@ -123,9 +114,6 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
             ".mp4": True
         }
 
-        # thislocal = os.path.dirname(os.path.abspath(__file__))
-        # self.ffmpeg = os.path.join(
-        #     os.path.dirname(os.path.abspath(__file__)), "ffmpeg.exe")
         self.ffmpeg = "ffmpeg.exe"
         self.ffprobe = "ffprobe.exe"
         self.concat_path = "concat_list.txt"
@@ -137,21 +125,7 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
         self.move_down_item_bt.hide()
         self.file_list_view.hide()
         # self.explorer_bt.hide()  # 隠すだけにしておく
-        
-        ico = QtGui.QIcon()
-        ico.addPixmap(
-            QtGui.QPixmap("images/filebrowser.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.explorer_bt.setIcon(ico)
-        self.explorer_bt.setIconSize(self.explorer_bt.size())
-        self.list_item_explorer_bt.setIcon(ico)
-        self.list_item_explorer_bt.setIconSize(self.list_item_explorer_bt.size())
-
-        ico.addPixmap(
-            QtGui.QPixmap("images/remove.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.del_sel_bt.setIcon(ico)
-        ico.addPixmap(
-            QtGui.QPixmap("images/x.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.del_all_bt.setIcon(ico)
+        self._init_icon()
 
         # hheader = QtWidgets.QHeaderView(QtCore.Qt.Orientation.Horizontal)
         # hheader.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
@@ -193,14 +167,6 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
 
         self._set_last_state()
 
-    def _load_ui(self):
-        # loader = QUiLoader()
-        # ui_file = QtCore.QFile("sj_video_conv_ui.ui")
-        # ui_file.open(QtCore.QIODevice.ReadOnly)
-        # loader.load(ui_file, self)
-        # ui_file.close()
-        pass
-
     def _init_config(self):
         self.config_path = os.path.join(
             os.environ.get("APPDATA"),
@@ -221,7 +187,7 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
             "mp4_compression_val": 0,
             # デフォルトはデスクトップで
             "save_path": os.path.join(
-                os.environ.get("USERPROFILE"), 'Desktop')
+                os.environ.get("USERPROFILE"), "Desktop")
         }
         self.config = cfg.ToolConfig(
             self.config_path, self.def_config_name, self.def_config)
@@ -280,12 +246,22 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
             style = f.read()
         self.setStyleSheet(style)
 
-    def ui_forcus_in(self, event):
-        r"""フォーカスイベント発生時にアクセレーターを外す"""
-        pass
+    def _init_icon(self):
+        """アイコンの設定"""
+        ico = QtGui.QIcon()
+        ico.addPixmap(
+            QtGui.QPixmap("images/filebrowser.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.explorer_bt.setIcon(ico)
+        self.explorer_bt.setIconSize(self.explorer_bt.size())
+        self.list_item_explorer_bt.setIcon(ico)
+        self.list_item_explorer_bt.setIconSize(self.list_item_explorer_bt.size())
 
-    def ui_forcus_out(self, event):
-        pass
+        ico.addPixmap(
+            QtGui.QPixmap("images/remove.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.del_sel_bt.setIcon(ico)
+        ico.addPixmap(
+            QtGui.QPixmap("images/x.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.del_all_bt.setIcon(ico)
 
     def closeEvent(self, event):
         """close event override"""
@@ -362,7 +338,7 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
             self.resolution_y_sp.setValue(360)
 
     def dropEvent(self, event):
-        r"""
+        """
         ドラッグされたオブジェクトの、ドロップ許可がおりた場合の処理
         """
         mimedata = event.mimeData()
@@ -396,7 +372,7 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
         self.update_table()
 
     def dragEnterEvent(self, event):
-        r"""
+        """
         ドラッグされたオブジェクトを許可するかどうかを決める
         ドラッグされたオブジェクトが、ファイルなら許可する
         """
@@ -406,22 +382,6 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
             event.accept()
         else:
             event.ignore()
-
-    def select_list(self, setlist, index):
-        r"""リストを選択"""
-        it = setlist.item(index)
-        setlist.setCurrentItem(it)
-
-    def add_to_list(self, list_widget, list_item):
-        r"""add wedget"""
-        list_item.sort()
-        list_widget.clear()
-        for i in list_item:
-            list_widget.addItem(i)
-
-    def get_basename_list(self, file_list):
-        r"""basenameだけを取得する"""
-        return [os.path.basename(i) for i in file_list]
 
     def is_exclusion(self, file_path):
         r"""除外する場合はTrue"""
@@ -443,8 +403,6 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
             msg = u"{} フォルダがありません".format(os.path.dirname(file_path))
             self.statusbar.showMessage(msg)
             return None
-
-    
 
         # ファイルがないならディレクトリパス
         if os.path.exists(file_path) is False:
@@ -495,9 +453,6 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
 
     def save_path_bt_clicked(self):
         r"""cliecked"""
-        # flt = "mp4 files (*.mp4);;mov files (*.mov);;All (*)"
-        # ret = self.save_file_path_dialog(
-        #     type_filter=flt, def_dir=self.save_path_le.text())
         ret = self.open_dir_path_dialog(def_dir=self.save_path_le.text())
 
         if ret == "":
@@ -581,9 +536,6 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
         if current_row != -1:
             if current_row == 0:
                 return None
-            # self.logger.info(self.video_table.visualRow(current_row), current_row)
-            # self.video_table.setSortingEnabled(False)
-            # self.video_table.sortItems(0, QtCore.Qt.AscendingOrder)
             for i in range(self.video_table.columnCount()):
                 # 上下のアイテムを入れ替え
                 # ソート列が固定されてしまい、空になったりして上手く動かない
@@ -593,43 +545,9 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
                 next_item = self.video_table.takeItem(next_row, i)
                 self.video_table.setItem(current_row, i, next_item)
                 self.video_table.setItem(next_row, i, current_item)
-
-                # item入れ替えも効かない？
-
-                # current_item_text = self.video_table.item(current_row, i).text()
-                # next_item_text = self.video_table.item(next_row, i).text()
-                # self.logger.info(current_item_text, next_item_text)
-
-                # self.video_table.setItem(
-                #     current_row, i, QtWidgets.QTableWidgetItem(next_item_text))
-                # self.video_table.setItem(
-                #     next_row, i, QtWidgets.QTableWidgetItem(current_item_text))
             self.video_table.setCurrentCell(next_row, current_col)
             self.video_table.setFocus()
-            # Table End
-        # テーブル版おわり
         return None
-
-        # リストバージョン
-        cnt = self.video_list.count()
-        if cnt == 0:
-            return None
-        current_row = self.video_list.currentRow()
-        if current_row == -1:
-            return None
-        if current_row == 0:
-            return None
-        # current_index = self.video_list.currentIndex().row()
-
-        current_row = self.video_list.currentRow()
-        current_item = self.video_list.takeItem(current_row)
-        self.video_list.insertItem(current_row - 1, current_item)
-
-        # item = self.video_list.item(current_index)
-        self.video_list.setCurrentItem(current_item)
-        self.video_list.setCurrentRow(current_row - 1)
-        self.video_list.setFocus()
-        # self.video_list.setItemSelected
 
     def move_down_item(self):
         # Table
@@ -648,39 +566,7 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
 
             self.video_table.setCurrentCell(next_row, current_col)
             self.video_table.setFocus()
-            # Table End
-        # テーブル版おわり
         return None
-
-        # リストバージョン
-        cnt = self.video_list.count()
-        if cnt == 0:
-            return None
-        current_row = self.video_list.currentRow()
-        if current_row == -1:
-            return None
-        if current_row == cnt - 1:
-            return None
-
-        current_item = self.video_list.takeItem(current_row)
-        self.video_list.insertItem(current_row + 1, current_item)
-        self.video_list.setCurrentItem(current_item)
-        self.video_list.setCurrentRow(current_row + 1)
-        self.video_list.setFocus()
-        # self.video_list.MoveUp(2)
-
-        # 一端回収して
-        # dic = OrderedDict()
-        # for i in range(self.video_list.count()):
-        #     txt = self.video_list.item(i).text()
-        #     dic[txt] = True
-
-        # # 削除
-        # dic.pop(sel)
-
-        # self.video_list.clear()
-        # for k in dic.keys():
-        #     self.video_list.addItem(k)
 
     def del_item(self):
         # テーブル版
@@ -698,7 +584,7 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
             # topとボトムが離れてたら複数行選択
             for i in range(sel_renge.topRow(), sel_renge.bottomRow() + 1):
                 del_rows.append(i)
-        # del_rows = del_rows.sort(reverse=True)
+
         del_rows = list(set(del_rows))
         for i in sorted(del_rows, reverse=True):
             self.logger.info(i)
@@ -706,35 +592,13 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
 
         # テーブル作り直して入れる?
         self.file_table = []
+        ext = ""
         for i in range(self.video_table.rowCount()):
             name = self.video_table.item(i, 0).text()
             path = self.video_table.item(i, 1).text()
             # ext = self.video_table.item(i, 2).text()
             self.file_table.append([name, path, ext])
-        # テーブル版おわり
         return None
-
-        # リスト版
-        current_row = self.video_list.currentRow()
-        if current_row == -1:
-            return None
-
-        sel = self.video_list.currentItem().text()
-        if sel == "":
-            return None
-
-        # 一端回収して
-        dic = OrderedDict()
-        for i in range(self.video_list.count()):
-            txt = self.video_list.item(i).text()
-            dic[txt] = True
-
-        # 削除
-        dic.pop(sel)
-
-        self.video_list.clear()
-        for k in dic.keys():
-            self.video_list.addItem(k)
 
     def clear_list(self):
         # self.video_list.clear()
@@ -795,7 +659,6 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
                 )
             self.logger.info(cmd)
             print(cmd)
-            # cmd_ret = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
             cmd_ret = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
             cmd_ret.wait()
 
@@ -812,12 +675,7 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
                 file_path
                 )
         cmd_ret = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-        # cmd_ret.wait()
         buffer = []
-        # for i in cmd_ret.stdout.readlines():
-        #     line = i.decode()
-        #     self.logger.info(line)
-        #     print(line)
         
         while True:
             # バッファから1行読み込む.
@@ -836,7 +694,6 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
                 file_path
                 )
         cmd_ret = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-        # cmd_ret.wait()
         buffer = []
         while True:
             # バッファから1行読み込む.
@@ -880,7 +737,13 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
         return path
 
     def run_convert(self, mode=None):
-        r"""コンバート"""
+        """コンバート"""
+        if os.path.exists(self.ffmpeg) is False:
+            self.statusbar.showMessage("ffmpegが見つかりません")
+            self.statusbar.setStyleSheet("QStatusBar{color:rgb(245, 245, 245); background:rgb(98, 21, 21)}")
+            QtWidgets.QApplication.processEvents()
+            return None
+
         if mode == "mp4":
             vcodec = self.mp4_codec_comboBox.currentText()
             acodec = self.mp4_acodec_comboBox.currentText()
@@ -903,7 +766,7 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
 
         self.statusbar.showMessage("Check List")
         if self.video_table.rowCount() is 0:
-            self.statusbar.showMessage(u"リストに動画がありません")
+            self.statusbar.showMessage("リストに動画がありません")
             self.statusbar.setStyleSheet("QStatusBar{color:rgb(245, 245, 245); background:rgb(98, 21, 21)}")
             QtWidgets.QApplication.processEvents()
             return None
@@ -922,10 +785,9 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
         # 基本コマンド
         # cmd = "{} -ss {} -i \"{}\" -ss 0 -t {} -vcodec rawvideo -ac 2 -ar 48000 -acodec pcm_s32le -pix_fmt yuv420p -y \"{}\"".format(
         cmd = []
-        # start_time = time.process_time()
         start_time = datetime.datetime.now()
         for i in range(self.video_table.rowCount()):
-            # ------------共通設定
+            # 共通設定
             # input file
             fname = self.video_table.item(i, 0).text()
             fpath = self.video_table.item(i, 1).text()
@@ -936,7 +798,6 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
                 self.ffprobe_item(input_file),
                 object_pairs_hook=collections.OrderedDict)
 
-            # self.statusbar.showMessage("Convert:{}".format(fname))
             self.info_lb.setText("Convert:{}".format(fname))
             QtWidgets.QApplication.processEvents()
 
@@ -1097,19 +958,19 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
 
             cmd.append("\"{}\"".format(output_file))
 
+            _full_cmd = "FullCommand: {}".format(" ".join(cmd))
             self.logger.debug("="*80)
-            self.logger.debug(" ".join(cmd))
+            self.logger.debug(_full_cmd)
             self.logger.debug("="*80)
             self.logger.info("="*80)
-            self.logger.info(" ".join(cmd))
+            self.logger.info(_full_cmd)
             self.logger.info("="*80)
             print("="*80)
-            print(" ".join(cmd))
+            print(_full_cmd)
             print("="*80)
 
             cmd_ret = subprocess.Popen(
                 " ".join(cmd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, shell=True)
-            # cmd_ret.wait()
             count = 0
             while True:
                 # マルチバイトが弾かれたので適当にtryで逃げる
@@ -1131,19 +992,13 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
                 except RuntimeError as e:
                     self.prog_bar.setValue(count)
                     self.statusbar.showMessage("Convert {:08d}:".format(count))
+
                 # total_time
-                # self.logger.info(line.replace('\r\n', ''))
                 QtWidgets.QApplication.processEvents()
                 if not line and cmd_ret.poll() is not None:
                     break
-                # self.prog_bar.setValue(count)
-                # if count >= 100:
-                #     count = 0
                 count += 1
-            # self.logger.info("="*80)
-            # print("="*80)
 
-        # stop_time = time.process_time()
         stop_time = datetime.datetime.now()
         self.prog_bar.setValue(100)
         self.info_lb.setText("Info: Total Process Time={}".format(stop_time - start_time))

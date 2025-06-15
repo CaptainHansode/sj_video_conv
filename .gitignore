@@ -176,3 +176,4 @@ cython_debug/
 # My patterns
 __old*/
 __test*/
+__sample*/
