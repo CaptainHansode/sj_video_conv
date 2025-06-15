@@ -142,7 +142,10 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
         ico.addPixmap(
             QtGui.QPixmap("images/filebrowser.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.explorer_bt.setIcon(ico)
+        self.explorer_bt.setIconSize(self.explorer_bt.size())
         self.list_item_explorer_bt.setIcon(ico)
+        self.list_item_explorer_bt.setIconSize(self.list_item_explorer_bt.size())
+
         ico.addPixmap(
             QtGui.QPixmap("images/remove.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.del_sel_bt.setIcon(ico)
@@ -187,8 +190,6 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
 
         self.size_template_comboBox.currentIndexChanged.connect(self.size_template_comboBox_chaged)
         self.size_template_comboBox.currentIndexChanged.connect(self.size_template_comboBox_chaged)
-        # gif_autofps_checkBox
-        # png_autofps_checkBox
 
         self._set_last_state()
 
@@ -234,30 +235,6 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
     def _check_license(self):
         r"""lic """
         result = False
-        # ret = lic.License(self.key).check_remaining_license_days()
-        # lic_key = hashlib.md5(str(self.key).encode()).hexdigest()
-
-        # # ハッシュキーが一致していない場合は不正
-        # if lic_key != ret['lic_key']:
-        #     self.logger.info("License key is invalid")
-        #     msg = u"License key is invalid\nライセンスキーが無効です"
-        #     self.msgbox.critical(self, "License Error", msg)
-        #     return result
-
-        # if ret['remaining_days'] > 10:
-        #     result = True
-
-        # # 10日前警告
-        # elif ret['remaining_days'] < 10 and ret['remaining_days'] >= 0:
-        #     msg = u"{day} days until the license expires.\nライセンスの有効期限 残り {day} 日".format(day=ret['remaining_days'])
-        #     self.msgbox.warning(self, "Info", msg)
-        #     result = True
-
-        # elif ret['remaining_days'] < 0:  # 期限を越えていると使えない
-        #     self.logger.info("License Expired")
-        #     msg = u"License Expired\nライセンスの有効期限が切れています"
-        #     self.msgbox.critical(self, "License Error", msg)
-        #     result = False
         return result
 
     def _set_last_state(self):
