@@ -1,5 +1,5 @@
 '''
-Copyright (c) 1998-2024 SAKAIDEN and CaptainHansode
+Copyright (c) SAKAIDEN and CaptainHansode
 sakaiden@live.jp
 http://sakaiden.com
 
@@ -29,11 +29,12 @@ import datetime
 import logging
 import numpy as np
 import importlib
-import info
-import sj_video_conv_ui
-import probe_result_dialog
-import config as cfg
 from PySide2 import QtCore, QtGui, QtWidgets
+from sj_video_conv import info
+from sj_video_conv import sj_video_conv_ui
+from sj_video_conv import probe_result_dialog
+from sj_video_conv import config as cfg
+
 
 importlib.reload(sj_video_conv_ui)
 importlib.reload(cfg)
@@ -50,8 +51,8 @@ class SJVideoConvResultWindow(QtWidgets.QDialog, probe_result_dialog.Ui_Dialog):
         self.close_bt.clicked.connect(self.closeEvent)
 
     def _init_style(self):
-        style_file = 'style.qss'
-        with open(style_file, 'r') as f:
+        style_file = "style.qss"
+        with open(style_file, "r") as f:
             style = f.read()
         self.setStyleSheet(style)
 
@@ -241,8 +242,8 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
         #                 os.path.dirname(__file__),
         #                 'style.qss'
         #                 )
-        style_file = 'style.qss'
-        with open(style_file, 'r') as f:
+        style_file = "style.qss"
+        with open(style_file, "r") as f:
             style = f.read()
         self.setStyleSheet(style)
 
@@ -765,7 +766,7 @@ class SJVideoConv(QtWidgets.QMainWindow, sj_video_conv_ui.Ui_MainWindow):
         pl_spd = self.mp4_playbackspeed_sp.value()
 
         self.statusbar.showMessage("Check List")
-        if self.video_table.rowCount() is 0:
+        if self.video_table.rowCount() == 0:
             self.statusbar.showMessage("リストに動画がありません")
             self.statusbar.setStyleSheet("QStatusBar{color:rgb(245, 245, 245); background:rgb(98, 21, 21)}")
             QtWidgets.QApplication.processEvents()

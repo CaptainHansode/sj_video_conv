@@ -1,5 +1,5 @@
 '''
-Copyright (c) 1998-2024 SAKAIDEN and CaptainHansode
+Copyright (c) SAKAIDEN and CaptainHansode
 sakaiden@live.jp
 http://sakaiden.com
 
@@ -17,11 +17,21 @@ Created by CaptainHansode
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
+import sys
+import os
 
-import importlib
-import main
+"""PyInstaller"""
+if hasattr(sys, "frozen"):
+    # If the application is frozen, set the base path to the directory of the executable
+    base_path = os.path.dirname(sys.executable)
+else:
+    base_path = os.path.dirname(os.path.abspath(__file__))
+
+sys.path.append(os.path.join(base_path))
+sys.path.append(os.path.join(os.path.dirname(base_path)))
+
+from sj_video_conv import main
 from PySide2 import QtWidgets
-importlib.reload(main)
 
 
 if __name__ == "__main__":
